@@ -1,0 +1,130 @@
+# .bashrc (termux) v. 1.0
+
+# Functions
+set_current_time() {
+    echo $(date +"%H:%M:%S")
+}
+
+load_termux_env() {
+    export home="/data/data/com.termux/files/home"
+    alias i='pkg install -y'
+    alias u='pkg update && pkg upgrade -y'
+    alias save_env='cp $bashrc $termuxrc'
+}
+
+src_script() {
+    local script=$1
+
+    if [ -f "$script" ]; then
+        source "$script" || echo "Failed to source $(basename $script)"  
+    fi
+}
+
+load_gk_functions() {
+    if [ ! -d $gkf ]; then
+        echo -e "Error: Directory not found."
+        return 1
+    else
+        for f in "$gkf"/*.sh; do
+	    src_script "$f"
+        done
+    fi
+}
+
+load_gk_config() {
+    if [ ! -d "$gkc" ]; then
+        echo -e "Error: Directory not found."
+        return 1
+    else
+        src_script "$gkc"/*_index
+
+        for c in "$gkc"/*.{conf,config}; do
+            src_script "$c"
+        done
+    fi
+}
+
+load_gk_shell() {
+    load_gk_functions
+    load_gk_config
+}
+
+goto() {
+    local arg=$1
+    local dir
+
+    if [ -z "$arg" ]; then
+        arg=home
+    fi
+
+    case $arg in
+        current|recent|latest|c) dir=$project_dir/platformpal ;;
+        app|new)  dir=$app_dir ;;
+        gk|g0dking)   dir=$gk ;;
+        home|h) dir=$home ;;
+        work|w|projects) dir=$project_dir ;;
+        *)    dir=$arg ;;
+    esac
+
+    if [ -d "$dir" ]; then
+        cd "$dir" || return 1
+    else
+        echo -e "${red}Error${nc}: Invalid Directory - $dir"
+        return 1
+    fi
+}
+
+rename() {
+    source $gkc/prompt.config
+    set_prompt $1 $2
+}
+
+# Fix PREFIX
+export PREFIX="/data/data/com.termux/files/home"
+
+# Vars
+export now=$(set_current_time)
+export NOW=$now
+export user=$(whoami)
+export home=$HOME
+export gk="$home/g0dking"
+export gkf="$gk/functions"
+export gkc="$gk/files/config"
+export gks="$gk/files/sys"
+export gksh="$gk/scripts"
+export gkw="$gk/www"
+export bashrc="$home/.bashrc"
+export dotbashrc="$gks/dot.bashrc"
+export termuxrc="$gks/termux.bashrc"
+export project_dir="$home/projects"
+export app_dir="$project_dir/app"
+
+# COMMON ALIASES
+alias c='clear'
+alias gk='cd $gk'
+alias gkf='cd $gkf'
+alias gkc='cd $gkc'
+alias gks='cd gks'
+alias gksh='cd $gkscr'
+alias gkw='cd $gkw'
+alias editrc='nano $bashrc'
+alias showrc='cat $bashrc'
+
+# LOGGING
+enable_logs
+
+# ENVIRONMENT
+clear
+
+source $gksh/initialize.sh
+apply
+
+source $HOME/.vps
+
+clear
+
+
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

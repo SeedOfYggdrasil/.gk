@@ -1,0 +1,15 @@
+.archive
+.inactive
+.old
+.backup
+.env
+env
+logs
+*.log
+node_modules
+*.json-lock
+<<<<<<< HEAD
+./termux/tmux/plugins/*/.git*
+=======
+termux/tmux/plugins/*/.git*
+>>>>>>> f3c6db6 (Created Fork)
